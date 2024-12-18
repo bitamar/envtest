@@ -1,0 +1,43 @@
+name: Deployment Workflow
+
+on:
+  workflow_dispatch: # Manual trigger for staging
+    inputs:
+      environment:
+        description: "Environment to deploy to (staging only for manual trigger)"
+        required: true
+        default: "staging"
+  push: # Automatic trigger for production
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Determine Deployment Target
+        id: set-env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" == "staging" ]]; then
+            echo "::set-output name=environment::staging"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "::set-output name=environment::production"
+          else
+            echo "Invalid deployment trigger!"
+            exit 1
+
+      - name: Print Deployment Target
+        run: |
+          echo "Deployment target is: ${{ steps.set-env.outputs.environment }}"
+
+      - name: Simulate Installation
+        run: |
+          echo "Simulating installation of dependencies..."
+
+      - name: Simulate Deployment
+        run: |
+          echo "Simulating deployment to ${{ steps.set-env.outputs.environment }} environment..."
