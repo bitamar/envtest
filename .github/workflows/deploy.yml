@@ -1,0 +1,46 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to (staging only for manual trigger)"
+        required: true
+        default: "staging"
+  push: 
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Automatically set the environment based on the trigger
+    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging' ? 'staging' : 'production' }}
+
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+
+      - name: Set Deployment Target
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" == "staging" ]]; then
+            echo "Deploying to staging."
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "Deploying to production."
+          else
+            echo "Invalid deployment trigger!"
+            exit 1
+          fi
+
+      - name: "Install Dependencies"
+        run: |
+          echo "install..."
+
+      - name: Deploy
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
+            echo "serverless deploy -s staging"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "serverless deploy -s prod"
+          fi
