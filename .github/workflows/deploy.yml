@@ -9,7 +9,7 @@ on:
         default: "staging"
   push: # Automatic trigger for production
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
