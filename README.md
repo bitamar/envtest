@@ -1,2 +1,2 @@
 # envtest
-test!
+test
